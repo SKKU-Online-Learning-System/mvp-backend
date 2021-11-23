@@ -14,10 +14,10 @@ router.use(fileUpload({ createParentPath: true }));
 
 // MySQL Connection
 var info = mysql.createConnection({
-    host     : 'ishadow-chatting.c3pkpxrvwyzo.ap-northeast-2.rds.amazonaws.com',
-    user     : 'soma1250',
-    password : 'ishadow123*',
-    database : 'test'
+    host     : '********',
+    user     : '********',
+    password : '********',
+    database : '********'
 });
 info.connect();
 // Connection End.
