@@ -18,7 +18,10 @@ const encoding = 'base64';
 
 
 
-// Join
+// 회원가입
+// Parameter : id(String), pw(String), name(String), sex(Char, 0/1), phone(String), birth(String, 날짜), desc(String)
+// Method : Post
+// Response: 회원 정보를 등록한다.
 router.post('/join', function(req, res, next) {
   const salt = crypto.randomBytes(keylen).toString(encoding);
   const key = crypto.pbkdf2Sync(req.body.pw, salt, iterations, keylen, digest).toString(encoding);
@@ -35,7 +38,10 @@ router.post('/join', function(req, res, next) {
   );
 });
 
-// Log in
+// 로그인
+// Parameter : id(String), pw(String)
+// Method : Post
+// Response : 로그인에 성공하면 세션을 만든다.
 router.post('/login', (req, res, next) => {
   users.query(
     `SELECT * FROM userinfo WHERE userID=?`,
@@ -72,7 +78,10 @@ router.post('/login', (req, res, next) => {
   );
 });
 
-// Log out
+// 로그아웃
+// Parameter : 없음
+// Method : Get
+// Response : 세션을 삭제한다.
 router.get('/logout', (req, res, next) => {
   req.session.destroy(function(err){});
   res.json({

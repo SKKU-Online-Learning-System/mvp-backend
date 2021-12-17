@@ -10,7 +10,10 @@ const router = express.Router();
 var users = mysql.createConnection(options);
 users.connect();
 
-// Lookup User Profile
+// 회원정보 조회
+// Parameter : 없음
+// Method : Get
+// Response : 회원정보를 조회한다.
 router.get('/profile', (req, res, next) => {
   if (req.session.isLogined === undefined) {
     res.json({
@@ -29,7 +32,10 @@ router.get('/profile', (req, res, next) => {
   }
 });
 
-// Update User Profile
+// 회원정보 수정
+// Parameter : name(String), sex(Char, 0/1), phone(String), birth(String, 날짜), desc(String)
+// Method : Post
+// Response : 회원정보를 수정한다.
 router.post('/update', (req, res, next) => {
   users.query(
     `UPDATE userinfo SET userName=?, userSex=?, userPhone=?, userBirth=?, userDesc=? WHERE userNo=?`,
