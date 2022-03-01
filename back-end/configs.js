@@ -1,6 +1,5 @@
 import mysql from 'mysql2';
 
-// console.log('config is loaded!');
 
 export const hashSettings = {
 	iterations: Number(process.env.HASH_ITERATIONS),

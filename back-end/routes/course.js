@@ -1,12 +1,49 @@
 import express from 'express';
 
-import { DB_promisePool as db, Err, statusJson } from './../configs'
-
+import { DB_promisePool as db, Err, statusJson } from './../configs';
 
 // express
 const router = express.Router();
 
 
+
+// 강의 생성
+router.post('/', async (req, res) => {
+	const { title, description, instructorId, category1, category2, difficulty } = req.body;
+	const thumbnail = 'no thumbnail'; // TODO 썸네일은 서버에 저장하고 DB에는 url 저장
+
+	try {
+		await db.query(
+			'INSERT INTO course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) VALUES(?, ?, ?, ?, ?, ?, ?)',
+			[title, description, instructorId, category1, category2, thumbnail, difficulty]
+		);
+		return res.json(statusJson(201, 'Created'));
+	} catch (err) {
+		return res.json(Err(err.message));
+	}
+});
+
+// 상위 카테고리 조회
+router.get('/cat1', async (req, res) => {
+	try {
+		const [cat, f] = await db.query('SELECT * FROM cat1');
+		return res.json(cat);
+	} catch (err) {
+		return res.json(Err(err.message));
+	}
+});
+
+// 하위 카테고리 조회
+router.get('/cat2', async (req, res) => {
+	try {
+		const [cat, f] = await db.query('SELECT * FROM cat2');
+		return res.json(cat);
+	} catch (err) {
+		return res.json(Err(err.message));
+	}
+});
+
+// 강의 상세정보
 router.get('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 
@@ -15,34 +52,43 @@ router.get('/:courseId', async (req, res) => {
 	}
 
 	try {
-		const [[ course ]] = await db.query('SELECT * FROM course WHERE id=?', [courseId]);
+		const [[course]] = await db.query('SELECT * FROM course WHERE id=?', [courseId]);
 
-		if (course === undefined)
+		if (course === undefined) {
 			return res.json(statusJson(400, 'Bad Request: Invalid course id.'));
-		
+		}
+
 		const queryInst = db.query('SELECT name FROM user WHERE id=?', [course.inst_id]);
 		const queryCat1 = db.query('SELECT name FROM cat1 WHERE id=?', [course.cat1]);
 		const queryCat2 = db.query('SELECT name FROM cat2 WHERE id=?', [course.cat2]);
-		
-		const [[[{name: instructor}], f1], [[{name: cat1}], f2], [[{name: cat2}], f3]] = await Promise.all([queryInst, queryCat1, queryCat2]);
+
+		const [
+			[[{ name: instructor }], f1],
+			[[{ name: cat1 }], f2],
+			[[{ name: cat2 }], f3],
+		] = await Promise.all([queryInst, queryCat1, queryCat2]);
 
 		delete course.inst_id;
+		delete course.cat1;
+		delete course.cat2;
 		course.instructor = instructor;
-		course.cat1 = cat1;
-		course.cat2 = cat2;
+		course.category1 = cat1;
+		course.category2 = cat2;
 
 		// hashtag
 		const [hash, f] = await db.query('SELECT tag FROM course_hashtag left join hashtag on hashtag_id=id where course_id=?', [course.id]);
-		course.hashtag = hash.map(x => x.tag);
+		course.hashtag = hash.map((x) => x.tag);
 
 		// lecture
 		course.lectures = '곧 추가될 예정입니다.';
 
-		res.json(course);
+		return res.json(course);
 	} catch (err) {
 		return res.json(Err(err.message));
 	}
 });
+
+
 
 
 

@@ -11,7 +11,7 @@ const router = express.Router();
 
 // 회원가입
 router.post('/join', async (req, res) => {
-	const { email, password, name, sex, phone, birth, desc } = req.body;
+	const { email, password, name, sex, phone, birth, description } = req.body;
 
 	const salt = crypto.randomBytes(hashSettings.keylen).toString(hashSettings.encoding);
 	const key = crypto.pbkdf2Sync(password, salt, hashSettings.iterations, hashSettings.keylen, hashSettings.digest).toString(hashSettings.encoding);
@@ -19,7 +19,7 @@ router.post('/join', async (req, res) => {
 	try {
 		await db.query(
 			'INSERT INTO user(email, password, name, sex, phone, birth, joined, description, salt) VALUES(?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
-			[email, key, name, sex, phone, birth, desc, salt],
+			[email, key, name, sex, phone, birth, description, salt],
 		);
 		return res.json(statusJson(201, 'Created'));
 	} catch (err) {
