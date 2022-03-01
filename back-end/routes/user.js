@@ -1,15 +1,12 @@
 import express from 'express';
-import cors from 'cors';
 
-import { DB_connection as db, Err } from '../configs';
+import { DB_promisePool as db, Err, statusJson } from '../configs';
 
 
 
 // express
 const router = express.Router();
 
-// middleware
-router.use(cors());
 
 
 
