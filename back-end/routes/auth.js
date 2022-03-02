@@ -2,15 +2,15 @@ import express from 'express';
 import crypto from 'crypto';
 import passport from 'passport';
 
-import { DB_promisePool as db, hashSettings, Err, statusJson } from './../configs';
+import { DB_promisePool as db, hashSettings, stat } from './../configs';
 import { isLoggedIn, isNotLoggedIn } from '../passport/middleware';
 
 
 // express
-const router = express.Router();
+const auth = express.Router();
 
 // 회원가입
-router.post('/join', async (req, res) => {
+auth.post('/join', async (req, res) => {
 	const { email, password, name, sex, phone, birth, description } = req.body;
 
 	const salt = crypto.randomBytes(hashSettings.keylen).toString(hashSettings.encoding);
@@ -28,7 +28,7 @@ router.post('/join', async (req, res) => {
 });
 
 // 아이디 중복체크
-router.get('/emailCheck/:email', async (req, res) => {
+auth.get('/emailCheck/:email', async (req, res) => {
 	const { email } = req.params;
 
 	try {
@@ -48,15 +48,15 @@ router.get('/emailCheck/:email', async (req, res) => {
 * Local login API using passport
 * Using Query string 
 */ 
-router.post('/login', isNotLoggedIn, (req, res, next) => {
+auth.post('/login', isNotLoggedIn, (req, res, next) => {
 	passport.authenticate('local', (err, user, info) => {
 		if(err) return next(err);
-		if(!user) return res.json(statusJson(400, 'login failed'));
-		return res.json(statusJson(200, req.body.email + ' login success'));
+		if(!user) return res.json(stat(400, 'login failed'));
+		return res.json(stat(200, req.body.email + ' login success'));
 	}) (req, res, next);
 });
 
-// router.post('/login', isNotLoggedIn, passport.authenticate('local', {
+// auth.post('/login', isNotLoggedIn, passport.authenticate('local', {
 // 	successRedirect: '/',
 // 	failureRedirect: '/login',
 // 	failureMessage: true
@@ -65,9 +65,9 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
 /*
 * logout API
 */ 
-router.get('/logout', isLoggedIn, (req, res) => {
+auth.get('/logout', isLoggedIn, (req, res) => {
 	req.logout();
 	res.redirect('/');
 });
 
-export default router;
+export default auth;

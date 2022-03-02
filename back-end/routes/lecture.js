@@ -4,7 +4,7 @@ import { DB_promisePool as db, stat } from './../configs'
 
 
 // express
-const router = express.Router();
+const lectures = express.Router();
 
 
 

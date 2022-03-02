@@ -3,14 +3,14 @@ import express from 'express';
 import { DB_promisePool as db, stat } from './../configs';
 
 // express
-const router = express.Router();
+const courses = express.Router();
 
 /*
 * Course Lookup API
 * Using Query string 
 * TODO: apply async await on db query
 */ 
-router.get('/', async (req, res) => {
+courses.get('/', async (req, res) => {
 	const pageInfo = req.query;
 
 	const pageNum = parseInt(pageInfo.page) || 1; // pageNum, default pageNum=1
@@ -62,16 +62,16 @@ router.get('/', async (req, res) => {
 		const [totalCnt] = await db.query(sqlCnt+sql, params);
 		const [results] = await db.query(sqlResult+sql+sqlLimit, params);
 		const pageCnt = Math.ceil(totalCnt[0].cnt/pageSize);
-		return res.json(statusJson(200, {"pageCnt": pageCnt, "records": results}));
+		return res.json({"pageCnt": pageCnt, "records": results});
 
 	} catch(err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
 
 // 모든 강의 조회
-router.get('/', async (req, res) => {
+courses.get('/', async (req, res) => {
 	try {
 		const [result, f] = await db.query('SELECT * FROM course');
 		return res.json(result);
@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
 })
 
 // 강의 생성
-router.post('/', async (req, res) => {
+courses.post('/', async (req, res) => {
 	const { title, description, instructorId, category1, category2, difficulty } = req.body;
 	const thumbnail = 'no thumbnail'; // TODO 썸네일은 서버에 저장하고 DB에는 url 저장
 
@@ -97,7 +97,7 @@ router.post('/', async (req, res) => {
 });
 
 // 상위 카테고리 조회
-router.get('/cat1', async (req, res) => {
+courses.get('/cat1', async (req, res) => {
 	try {
 		const [cat, f] = await db.query('SELECT * FROM cat1');
 		return res.json(cat);
@@ -107,7 +107,7 @@ router.get('/cat1', async (req, res) => {
 });
 
 // 하위 카테고리 조회
-router.get('/cat2', async (req, res) => {
+courses.get('/cat2', async (req, res) => {
 	try {
 		const [cat, f] = await db.query('SELECT * FROM cat2');
 		return res.json(cat);
@@ -117,7 +117,7 @@ router.get('/cat2', async (req, res) => {
 });
 
 // 강의 조회
-router.get('/:courseId', async (req, res) => {
+courses.get('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 
 	if (isNaN(courseId)) {
@@ -162,7 +162,7 @@ router.get('/:courseId', async (req, res) => {
 });
 
 // 강의 수정
-router.put('/:courseId', async (req, res) => {
+courses.put('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 	const { title, description, category1, category2, difficulty } = req.body;
 	const thumbnail = 'no thumbnail'; // TODO 썸네일은 서버에 저장하고 DB에는 url 저장
@@ -183,7 +183,7 @@ router.put('/:courseId', async (req, res) => {
 });
 
 // 강의 삭제
-router.delete('/:courseId', async (req, res) => {
+courses.delete('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 
 	if (isNaN(courseId)) {
@@ -206,4 +206,4 @@ router.delete('/:courseId', async (req, res) => {
 
 
 
-export default router;
+export default courses;
