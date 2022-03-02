@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { DB_promisePool as db, Err, statusJson } from './../configs'
+import { DB_promisePool as db, stat } from './../configs'
 
 
 // express
@@ -11,8 +11,8 @@ router.get('/', function(req, res, next) {
 	res.render('index', { title: 'Express' });
 });
 
-router.get('/course1461', (req, res) => {
-	var data = [
+router.get('/db', async (req, res) => {
+	const course = [
 		{
 			name: '[테스트] 스프링 핵심 원리 - 고급편',
 			desc: '중급자를 위해 준비한 [백엔드, 웹 개발] 강의입니다. 스프링의 핵심 원리와 고급 기술들을 깊이있게 학습하고, 스프링을 자신있게 사용할 수 있습니다.',
@@ -55,7 +55,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] AWS 클라우드 서비스 인프라 구축 이해와 해킹, 보안',
-			desc: 'IT 서비스가 클라우드 환경으로 빠르게 전환되고 있습니다. 아마존 AWS 클라우드 환경 보안을 위해 알아야 할 기본적인 가상 인프라 구축부터, 각 영역별 보안 위협 모니터링, 취약점 진단 관점을 통해    보안 실무를 배우게 됩니다.',
+			desc: 'IT 서비스가 클라우드 환경으로 빠르게 전환되고 있습니다. 아마존 AWS 클라우드 환경 보안을 위해 알아야 할 기본적인 가상 인프라 구축부터, 각 영역별 보안 위협 모니터링, 취약점 진단 관점을 통해보안 실무를 배우게 됩니다.',
 			inst: 1,
 			cat1: 2,
 			cat2: 12,
@@ -95,7 +95,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] 증권 데이터 수집과 분석으로 신호와 소음 찾기',
-			desc: '투자 강의가 아닙니다. 증권 데이터를 통한 데이터 수집, 분석과 시각화를 다룹니다. 다양한 데이터 포맷을 다루며 다양한 텍스트 전처리 기법을 익힙니다. 시계열 데이터의 시각화 기법과 스케일에 대한 표현 방법 주가 데이터를 해석하기 위한 몇 가지 기법을 다룹니다. 이 강의는 데이터 분석을 통해 인사이트 를 얻는 방법을 알아가는 강좌입니다. 주가 데이터를 통해 배운 내용을 시계열이 활용되는 수요량, 재고량,    판매량, 트래픽량 등의 데이터를 수집, 분석, 시각화에 활용해 볼 수 있도록 구성 되어있습니다.',
+			desc: '투자 강의가 아닙니다. 증권 데이터를 통한 데이터 수집, 분석과 시각화를 다룹니다. 다양한 데이터 포맷을 다루며 다양한 텍스트 전처리 기법을 익힙니다. 시계열 데이터의 시각화 기법과 스케일에 대한 표현 방법 주가 데이터를 해석하기 위한 몇 가지 기법을 다룹니다. 이 강의는 데이터 분석을 통해 인사이트 를 얻는 방법을 알아가는 강좌입니다. 주가 데이터를 통해 배운 내용을 시계열이 활용되는 수요량, 재고량,판매량, 트래픽량 등의 데이터를 수집, 분석, 시각화에 활용해 볼 수 있도록 구성 되어있습니다.',
 			inst: 1,
 			cat1: 3,
 			cat2: 17,
@@ -103,7 +103,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] 딥러닝 CNN 완벽 가이드 - Fundamental 편',
-			desc: '딥러닝·CNN 핵심 이론부터 다양한 CNN 모델 구현 방법, 실전 문제를 통한 실무 딥러닝 개발    노하우까지, 딥러닝 CNN 기술 전문가로 거듭나고 싶다면 이 강의와 함께하세요 :)',
+			desc: '딥러닝·CNN 핵심 이론부터 다양한 CNN 모델 구현 방법, 실전 문제를 통한 실무 딥러닝 개발노하우까지, 딥러닝 CNN 기술 전문가로 거듭나고 싶다면 이 강의와 함께하세요 :)',
 			inst: 1,
 			cat1: 3,
 			cat2: 18,
@@ -159,7 +159,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] 피그마로 콘텐츠 디자인하기',
-			desc: '피그마는 UX/UI전용 툴이다? 아닙니다. 여러분의 썸네일, 광고소재, 상세페이지까지 피그마    하나로 만들어보겠습니다.',
+			desc: '피그마는 UX/UI전용 툴이다? 아닙니다. 여러분의 썸네일, 광고소재, 상세페이지까지 피그마하나로 만들어보겠습니다.',
 			inst: 1,
 			cat1: 4,
 			cat2: 25,
@@ -167,7 +167,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] 유니티3D를 사용한 VR 제작 기초',
-			desc: '유니티를 사용하여 VR 환경을 구축하며 VR 컨텐츠를 개발하기 위해 필요한 기본적인 기능을    구현해봅니다.',
+			desc: '유니티를 사용하여 VR 환경을 구축하며 VR 컨텐츠를 개발하기 위해 필요한 기본적인 기능을구현해봅니다.',
 			inst: 1,
 			cat1: 4,
 			cat2: 28,
@@ -255,7 +255,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] 오늘부터 개발자 - 개발자를 준비하기 전 꼭 알아야 할 것',
-			desc: '오늘부터 (나도) 개발자! 개발자에 도전하는 분들을 위해 기본적인 개발 지식부터 준비 방법, 각종 노하우까지 전해드립니다.',    
+			desc: '오늘부터 (나도) 개발자! 개발자에 도전하는 분들을 위해 기본적인 개발 지식부터 준비 방법, 각종 노하우까지 전해드립니다.',
 			inst: 1,
 			cat1: 7,
 			cat2: 40,
@@ -271,7 +271,7 @@ router.get('/course1461', (req, res) => {
 		},
 		{
 			name: '[테스트] 퍼블리셔 취업 진짜 실전 가이드',
-			desc: '퍼블리셔 취업을 위한 진짜 가이드 전자책(PDF)으로 효율적인 퍼블리싱 학습방법, 좋은 퍼블 리싱 강의 잘 가르치는 퍼블리싱 강사 고르는 안목, 신입이지만 경력자처럼 퍼블리싱하는 요령, 바람직한 코 딩 습관과 원칙, 개인 포트폴리오 홈페이지 제작 방법, 디자이너 개발자와의 협업 요령, 퍼블리셔로 알아야    할 필수 사이트, 포토샵 UI 디자인 실력키우기 등 퍼블리셔 취업을 위해 반드시 알아야 하는 HTML+CSS+JQUERY 퍼블리싱 기본기를 상세하게 알려드립니다. 또한, 국비지원 퍼블리셔 과정에 대해 상세히 설명합니다.',
+			desc: '퍼블리셔 취업을 위한 진짜 가이드 전자책(PDF)으로 효율적인 퍼블리싱 학습방법, 좋은 퍼블 리싱 강의 잘 가르치는 퍼블리싱 강사 고르는 안목, 신입이지만 경력자처럼 퍼블리싱하는 요령, 바람직한 코 딩 습관과 원칙, 개인 포트폴리오 홈페이지 제작 방법, 디자이너 개발자와의 협업 요령, 퍼블리셔로 알아야할 필수 사이트, 포토샵 UI 디자인 실력키우기 등 퍼블리셔 취업을 위해 반드시 알아야 하는 HTML+CSS+JQUERY 퍼블리싱 기본기를 상세하게 알려드립니다. 또한, 국비지원 퍼블리셔 과정에 대해 상세히 설명합니다.',
 			inst: 1,
 			cat1: 7,
 			cat2: 40,
@@ -333,16 +333,9 @@ router.get('/course1461', (req, res) => {
 			cat2: 44,
 			diff: 1
 		}
-		];
-	data.forEach(e => {
-		// console.log(e.name);
-		db.query(`insert into course(name, description, inst_id, cat1, cat2, thumbnail, difficulty) values("${e.name}", "${e.desc}", ${e.inst}, ${e.cat1}, ${e.cat2}, 'no thumbnail', ${e.diff});`);
-	});
-	res.send('success');
-});
-
-router.get('/hash1234135', (req, res) => {
-	var data = [[1, 1],
+	];
+	const course_hashtag = [
+	[1, 1],
 	[1, 9],
 	[2, 1],
 	[3, 2],
@@ -421,11 +414,585 @@ router.get('/hash1234135', (req, res) => {
 	[57, 37],
 	[57, 38],
 	[57, 39],
-	[58, 40]];
-	data.forEach(e => {
-		db.query(`insert into course_hashtag(course_id, hashtag_id) values(${e[0]}, ${e[1]});`)
-	})
-	res.send('success');
-});
+	[58, 40]
+	];
+	const hashtag = [
+		{
+		"id": 1,
+		"tag": "Back-End"
+		},
+		{
+		"id": 2,
+		"tag": "Spring"
+		},
+		{
+		"id": 3,
+		"tag": "React Native"
+		},
+		{
+		"id": 4,
+		"tag": "앱개발"
+		},
+		{
+		"id": 5,
+		"tag": "Flutter"
+		},
+		{
+		"id": 6,
+		"tag": "클론코딩"
+		},
+		{
+		"id": 7,
+		"tag": "Front-End"
+		},
+		{
+		"id": 8,
+		"tag": "Vue.js"
+		},
+		{
+		"id": 9,
+		"tag": "Node.js"
+		},
+		{
+		"id": 10,
+		"tag": "Express"
+		},
+		{
+		"id": 11,
+		"tag": "정보보안"
+		},
+		{
+		"id": 12,
+		"tag": "AWS"
+		},
+		{
+		"id": 13,
+		"tag": "Linux"
+		},
+		{
+		"id": 14,
+		"tag": "블록체인"
+		},
+		{
+		"id": 15,
+		"tag": "개발"
+		},
+		{
+		"id": 16,
+		"tag": "Docker"
+		},
+		{
+		"id": 17,
+		"tag": "네트워크"
+		},
+		{
+		"id": 18,
+		"tag": "프로토콜"
+		},
+		{
+		"id": 19,
+		"tag": "데이터 분석"
+		},
+		{
+		"id": 20,
+		"tag": "Python"
+		},
+		{
+		"id": 21,
+		"tag": "딥러닝"
+		},
+		{
+		"id": 22,
+		"tag": "CNN"
+		},
+		{
+		"id": 23,
+		"tag": "인공신경망"
+		},
+		{
+		"id": 24,
+		"tag": "웹 크롤링"
+		},
+		{
+		"id": 25,
+		"tag": "데이터 시각화"
+		},
+		{
+		"id": 26,
+		"tag": "R"
+		},
+		{
+		"id": 27,
+		"tag": "3D 모델링"
+		},
+		{
+		"id": 28,
+		"tag": "3ds MAX"
+		},
+		{
+		"id": 29,
+		"tag": "UX/UI"
+		},
+		{
+		"id": 30,
+		"tag": "취업"
+		},
+		{
+		"id": 31,
+		"tag": "애니메이션"
+		},
+		{
+		"id": 32,
+		"tag": "이모티콘"
+		},
+		{
+		"id": 33,
+		"tag": "콘텐츠 마케팅"
+		},
+		{
+		"id": 34,
+		"tag": "Figma"
+		},
+		{
+		"id": 35,
+		"tag": "Unity"
+		},
+		{
+		"id": 36,
+		"tag": "VR/AR"
+		},
+		{
+		"id": 37,
+		"tag": "Excel"
+		},
+		{
+		"id": 38,
+		"tag": "MS-Office"
+		},
+		{
+		"id": 39,
+		"tag": "한컴오피스"
+		},
+		{
+		"id": 40,
+		"tag": "실무"
+		},
+		{
+		"id": 41,
+		"tag": "PR"
+		},
+		{
+		"id": 42,
+		"tag": "디지털 마케팅"
+		},
+		{
+		"id": 43,
+		"tag": "투자"
+		},
+		{
+		"id": 44,
+		"tag": "Pandas"
+		},
+		{
+		"id": 45,
+		"tag": "수학"
+		},
+		{
+		"id": 46,
+		"tag": "선형대수학"
+		},
+		{
+		"id": 47,
+		"tag": "게임"
+		},
+		{
+		"id": 48,
+		"tag": "미적분"
+		},
+		{
+		"id": 49,
+		"tag": "영어"
+		},
+		{
+		"id": 50,
+		"tag": "면접"
+		},
+		{
+		"id": 51,
+		"tag": "자기계발"
+		},
+		{
+		"id": 52,
+		"tag": "웹 퍼블리싱"
+		},
+		{
+		"id": 53,
+		"tag": "창업"
+		},
+		{
+		"id": 54,
+		"tag": "경영"
+		},
+		{
+		"id": 55,
+		"tag": "재테크"
+		},
+		{
+		"id": 56,
+		"tag": "집필"
+		},
+		{
+		"id": 57,
+		"tag": "글쓰기"
+		},
+		{
+		"id": 58,
+		"tag": "E-Sports"
+		}
+	];
+	const cat1 = [
+		{
+		"id": 1,
+		"name": "개발 · 프로그래밍"
+		},
+		{
+		"id": 2,
+		"name": "보안 · 네트워크"
+		},
+		{
+		"id": 3,
+		"name": "데이터 사이언스"
+		},
+		{
+		"id": 4,
+		"name": "크리에이티브"
+		},
+		{
+		"id": 5,
+		"name": "직무 · 마케팅"
+		},
+		{
+		"id": 6,
+		"name": "학문 · 외국어"
+		},
+		{
+		"id": 7,
+		"name": "커리어"
+		},
+		{
+		"id": 8,
+		"name": "교양"
+		}
+	];
+	const cat2 = [
+		{
+		"id": 1,
+		"name": "웹 개발",
+		"cat1_id": 1
+		},
+		{
+		"id": 2,
+		"name": "프론트엔드",
+		"cat1_id": 1
+		},
+		{
+		"id": 3,
+		"name": "백엔드",
+		"cat1_id": 1
+		},
+		{
+		"id": 4,
+		"name": "풀스택",
+		"cat1_id": 1
+		},
+		{
+		"id": 5,
+		"name": "모바일 앱 개발",
+		"cat1_id": 1
+		},
+		{
+		"id": 6,
+		"name": "프로그래밍 언어",
+		"cat1_id": 1
+		},
+		{
+		"id": 7,
+		"name": "알고리즘 · 자료구조",
+		"cat1_id": 1
+		},
+		{
+		"id": 8,
+		"name": "데이터 사이언스",
+		"cat1_id": 1
+		},
+		{
+		"id": 9,
+		"name": "데이터베이스",
+		"cat1_id": 1
+		},
+		{
+		"id": 10,
+		"name": "데브옵스 · 인프라",
+		"cat1_id": 1
+		},
+		{
+		"id": 11,
+		"name": "게임 개발",
+		"cat1_id": 1
+		},
+		{
+		"id": 12,
+		"name": "보안",
+		"cat1_id": 2
+		},
+		{
+		"id": 13,
+		"name": "시스템",
+		"cat1_id": 2
+		},
+		{
+		"id": 14,
+		"name": "클라우드",
+		"cat1_id": 2
+		},
+		{
+		"id": 15,
+		"name": "블록체인",
+		"cat1_id": 2
+		},
+		{
+		"id": 16,
+		"name": "기타",
+		"cat1_id": 2
+		},
+		{
+		"id": 17,
+		"name": "데이터 분석",
+		"cat1_id": 3
+		},
+		{
+		"id": 18,
+		"name": "인공지능",
+		"cat1_id": 3
+		},
+		{
+		"id": 19,
+		"name": "데이터 시각화",
+		"cat1_id": 3
+		},
+		{
+		"id": 20,
+		"name": "데이터 수집 · 처리",
+		"cat1_id": 3
+		},
+		{
+		"id": 21,
+		"name": "기타",
+		"cat1_id": 3
+		},
+		{
+		"id": 22,
+		"name": "CAD · 3D 모델링",
+		"cat1_id": 4
+		},
+		{
+		"id": 23,
+		"name": "웹 퍼블리싱",
+		"cat1_id": 4
+		},
+		{
+		"id": 24,
+		"name": "UX/UI",
+		"cat1_id": 4
+		},
+		{
+		"id": 25,
+		"name": "그래픽 디자인",
+		"cat1_id": 4
+		},
+		{
+		"id": 26,
+		"name": "디자인 툴",
+		"cat1_id": 4
+		},
+		{
+		"id": 27,
+		"name": "사진 · 영상",
+		"cat1_id": 4
+		},
+		{
+		"id": 28,
+		"name": "VR/AR",
+		"cat1_id": 4
+		},
+		{
+		"id": 29,
+		"name": "사운드",
+		"cat1_id": 4
+		},
+		{
+		"id": 30,
+		"name": "기타",
+		"cat1_id": 4
+		},
+		{
+		"id": 31,
+		"name": "오피스",
+		"cat1_id": 5
+		},
+		{
+		"id": 32,
+		"name": "마케팅",
+		"cat1_id": 5
+		},
+		{
+		"id": 33,
+		"name": "기획 · 전략 · PM",
+		"cat1_id": 5
+		},
+		{
+		"id": 34,
+		"name": "업무 자동화",
+		"cat1_id": 5
+		},
+		{
+		"id": 35,
+		"name": "금융 · 경영",
+		"cat1_id": 5
+		},
+		{
+		"id": 36,
+		"name": "기타",
+		"cat1_id": 5
+		},
+		{
+		"id": 37,
+		"name": "수학",
+		"cat1_id": 6
+		},
+		{
+		"id": 38,
+		"name": "외국어",
+		"cat1_id": 6
+		},
+		{
+		"id": 39,
+		"name": "기타",
+		"cat1_id": 6
+		},
+		{
+		"id": 40,
+		"name": "취업 · 이직",
+		"cat1_id": 7
+		},
+		{
+		"id": 41,
+		"name": "개인 브랜딩",
+		"cat1_id": 7
+		},
+		{
+		"id": 42,
+		"name": "창업",
+		"cat1_id": 7
+		},
+		{
+		"id": 43,
+		"name": "기타",
+		"cat1_id": 7
+		},
+		{
+		"id": 44,
+		"name": "교양",
+		"cat1_id": 8
+		}
+	];
+
+	// CREATE TABLE
+	try {
+		await db.query(`CREATE TABLE course
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			title VARCHAR(100) NOT NULL,
+			description TEXT NOT NULL,
+			inst_id BIGINT NOT NULL,
+			cat1 INT NOT NULL,
+			cat2 INT NOT NULL,
+			thumbnail VARCHAR(200) NULL,
+			difficulty INT NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);`);
+		await db.query(`CREATE TABLE user
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			email VARCHAR(50) NOT NULL UNIQUE,
+			password VARCHAR(200) NOT NULL,
+			name VARCHAR(20) NOT NULL,
+			sex INT NOT NULL,
+			phone VARCHAR(20) NOT NULL,
+			birth DATE NOT NULL,
+			joined DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			description VARCHAR(200),
+			privilege INT NOT NULL DEFAULT 4,
+			salt VARCHAR(200) NOT NULL
+		);`);
+		await db.query(`CREATE TABLE cat1
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			name VARCHAR(30) NOT NULL
+		);`);
+		await db.query(`CREATE TABLE cat2
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			name VARCHAR(30) NOT NULL,
+			cat1_id BIGINT NOT NULL
+		);`);
+		await db.query(`CREATE TABLE hashtag
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			tag VARCHAR(20) NOT NULL
+		);`);
+		await db.query(`CREATE TABLE course_hashtag
+		(
+			course_id BIGINT NOT NULL,
+			hashtag_id BIGINT NOT NULL
+		);`);
+	} catch (err) {
+		return res.json(stat(500, err.message));
+	}
+	
+	// course
+	course.forEach(async (e) => {
+		await db.query(`INSERT INTO course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) VALUES(?, ?, ?, ?, ?, ?, ?)`,
+		[e.name, e.desc, e.inst, e.cat1, e.cat2, 'no thumbnail', e.diff])
+			.catch(err => res.json(stat(500, err.message)));
+	});
+	// course_hashtag
+	course_hashtag.forEach(async (e) => {
+		await db.query(`INSERT INTO course_hashtag(course_id, hashtag_id) VALUES(?, ?)`,
+		[e[0], e[1]])
+			.catch(err => res.json(stat(500, err.message)));
+	});
+	// hashtag
+	hashtag.forEach(async (e) => {
+		await db.query(`INSERT INTO hashtag(tag) VALUES(?)`,
+		[e.tag])
+			.catch(err => res.json(stat(500, err.message)));
+	});
+	// cat1
+	cat1.forEach(async (e) => {
+		await db.query(`INSERT INTO cat1(name) VALUES(?)`,
+		[e.name])
+			.catch(err => res.json(stat(500, err.message)));
+	});
+	// cat2
+	cat2.forEach(async (e) => {
+		await db.query(`INSERT INTO cat2(name, cat1_id) VALUES(?, ?)`,
+		[e.name, e.cat1_id])
+			.catch(err => res.json(stat(500, err.message)));
+	});
+
+	return res.json
+})
+
 
 export default router;
