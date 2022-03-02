@@ -11,8 +11,8 @@ router.get('/', function(req, res, next) {
 	res.render('index', { title: 'Express' });
 });
 
-router.get('/course', async (req, res) => {
-	var data = [
+router.get('/db', async (req, res) => {
+	const course = [
 		{
 			name: '[테스트] 스프링 핵심 원리 - 고급편',
 			desc: '중급자를 위해 준비한 [백엔드, 웹 개발] 강의입니다. 스프링의 핵심 원리와 고급 기술들을 깊이있게 학습하고, 스프링을 자신있게 사용할 수 있습니다.',
@@ -334,30 +334,8 @@ router.get('/course', async (req, res) => {
 			diff: 1
 		}
 	];
-	try {
-		await db.query(`CREATE TABLE course
-		(
-			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-			title VARCHAR(100) NOT NULL,
-			description TEXT NOT NULL,
-			inst_id BIGINT NOT NULL,
-			cat1 INT NOT NULL,
-			cat2 INT NOT NULL,
-			thumbnail VARCHAR(200) NULL,
-			difficulty INT NOT NULL,
-			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-		);`);
-		data.forEach(async (e) => {
-			await db.query(`insert into course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) values("${e.name}", "${e.desc}", ${e.inst}, ${e.cat1}, ${e.cat2}, 'no thumbnail', ${e.diff});`);
-		});
-		res.send('success');
-	} catch (err) {
-		return res.json(Err(err.message));
-	}
-});
-
-router.get('/course_hashtag', async (req, res) => {
-	var data = [[1, 1],
+	const course_hashtag = [
+	[1, 1],
 	[1, 9],
 	[2, 1],
 	[3, 2],
@@ -436,24 +414,9 @@ router.get('/course_hashtag', async (req, res) => {
 	[57, 37],
 	[57, 38],
 	[57, 39],
-	[58, 40]];
-	try {
-		await db.query(`CREATE TABLE course_hashtag
-		(
-			course_id BIGINT NOT NULL,
-			hashtag_id BIGINT NOT NULL
-		);`);
-		data.forEach(async (e) => {
-			await db.query(`insert into cosurse_hashtag(course_id, hashtag_id) values(${e[0]}, ${e[1]});`)
-		})
-		res.send('success');
-	} catch (err) {
-		return res.json(Err(err.message));
-	}
-});
-
-router.get('/hashtag', async (req, res) => {
-	const data = [
+	[58, 40]
+	];
+	const hashtag = [
 		{
 		"id": 1,
 		"tag": "Back-End"
@@ -687,23 +650,7 @@ router.get('/hashtag', async (req, res) => {
 		"tag": "E-Sports"
 		}
 	];
-	try {
-		await db.query(`CREATE TABLE hashtag
-		(
-			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-			tag VARCHAR(20) NOT NULL
-		);`);
-		data.forEach(async (e) => {
-			await db.query(`INSERT INTO hashtag(id, tag) VALUES(${e.id}, ${e.tag})`);
-		})
-		return res.send('success');
-	} catch (err) {
-		return res.json(Err(err.message));
-	}
-});
-
-router.get('/cat1', async (req, res) => {
-	const data = [
+	const cat1 = [
 		{
 		"id": 1,
 		"name": "개발 · 프로그래밍"
@@ -737,23 +684,7 @@ router.get('/cat1', async (req, res) => {
 		"name": "교양"
 		}
 	];
-	try {
-		await db.query(`CREATE TABLE cat1
-		(
-			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-			name VARCHAR(30) NOT NULL
-		);`);
-		data.forEach(async (e) => {
-			await db.query(`INSERT INTO cat1(id, name) VALUES(${e.id}, ${e.name})`);
-		})
-		return res.send('success');
-	} catch (err) {
-		return res.json(Err(err.message));
-	}
-});
-
-router.get('/cat2', async (req, res) => {
-	const data = [
+	const cat2 = [
 		{
 		"id": 1,
 		"name": "웹 개발",
@@ -975,20 +906,86 @@ router.get('/cat2', async (req, res) => {
 		"cat1_id": 8
 		}
 	];
+
+	// CREATE TABLE
 	try {
+		await db.query(`CREATE TABLE course
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			title VARCHAR(100) NOT NULL,
+			description TEXT NOT NULL,
+			inst_id BIGINT NOT NULL,
+			cat1 INT NOT NULL,
+			cat2 INT NOT NULL,
+			thumbnail VARCHAR(200) NULL,
+			difficulty INT NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);`);
+		await db.query(`CREATE TABLE user
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			email VARCHAR(50) NOT NULL UNIQUE,
+			password VARCHAR(200) NOT NULL,
+			name VARCHAR(20) NOT NULL,
+			sex INT NOT NULL,
+			phone VARCHAR(20) NOT NULL,
+			birth DATE NOT NULL,
+			joined DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			description VARCHAR(200),
+			privilege INT NOT NULL DEFAULT 4,
+			salt VARCHAR(200) NOT NULL
+		);`);
+		await db.query(`CREATE TABLE cat1
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			name VARCHAR(30) NOT NULL
+		);`);
 		await db.query(`CREATE TABLE cat2
 		(
 			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 			name VARCHAR(30) NOT NULL,
 			cat1_id BIGINT NOT NULL
 		);`);
-		data.forEach(async (e) => {
-			await db.query(`INSERT INTO cat2(id, name, cat1_id) VALUES(${e.id}, ${e.name}, ${e.cat1_id})`);
-		})
-		return res.send('success');
+		await db.query(`CREATE TABLE hashtag
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			tag VARCHAR(20) NOT NULL
+		);`);
+		await db.query(`CREATE TABLE course_hashtag
+		(
+			course_id BIGINT NOT NULL,
+			hashtag_id BIGINT NOT NULL
+		);`);
 	} catch (err) {
 		return res.json(Err(err.message));
 	}
-});
+	
+	// course
+	course.forEach(async (e) => {
+		await db.query(`INSERT INTO course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) VALUES(${e.name}, ${e.desc}, ${e.inst}, ${e.cat1}, ${e.cat2}, ${'no thumbnail'}, ${e.diff})`)
+			.catch(err => res.json(Err(err.message)));
+	});
+	// course_hashtag
+	course_hashtag.forEach(async (e) => {
+		await db.query(`INSERT INTO course_hashtag(course_id, hashtag_id) VALUES(${e[0]}, ${e[1]})`)
+			.catch(err => res.json(Err(err.message)));
+	});
+	// hashtag
+	hashtag.forEach(async (e) => {
+		await db.query(`INSERT INTO hashtag(tag) VALUES(${e.tag})`)
+			.catch(err => res.json(Err(err.message)));
+	});
+	// cat1
+	cat1.forEach(async (e) => {
+		await db.query(`INSERT INTO cat1(name) VALUES(${e.name})`)
+			.catch(err => res.json(Err(err.message)));
+	});
+	// cat2
+	cat2.forEach(async (e) => {
+		await db.query(`INSERT INTO cat2(name, cat1_id) VALUES(${e.name}, ${e.cat1_id})`)
+			.catch(err => res.json(Err(err.message)));
+	});
+})
+
 
 export default router;
