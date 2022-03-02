@@ -8,4 +8,5 @@ npm install은 back-end 폴더에서 해주세요
 
 변수는 최대한 const로
 
-각 라우터 이름은 url 이름으로
+// 각 라우터 이름은 url 이름으로
+// status 함수 통일
