@@ -1,6 +1,5 @@
 import mysql from 'mysql2';
 
-// console.log('config is loaded!');
 
 export const hashSettings = {
 	iterations: Number(process.env.HASH_ITERATIONS),
@@ -24,14 +23,32 @@ const DB_promisePool = DB_pool.promise();
 export { DB_promisePool };
 
 
-export function statusJson(code, msg) {
-	return {
-		statusCode: code,
-		msg: msg
+export function stat(code, ...args) {
+	const table = {
+		'200': 'OK',
+		'201': 'Created',
+		'400': 'Bad Request',
+		'401': 'Unauthorized',
+		'403': 'Forbidden',
+		'404': 'Not Found',
+		'409': 'Conflict',
+		'500': 'Internal Server Error',
+	};
+
+	let msg = '';
+	if (args.length > 0) {
+		msg = ': ' + args.join(' ');
+	}
+
+	if (!Object.keys(table).includes(code.toString())) {
+		return {
+			status: code,
+			msg: 'Unknown status code' + msg
+		}
+	} else {
+		return {
+			status: code,
+			msg: table[code.toString()] + msg
+		}
 	}
 }
-
-export function Err(msg) {
-	return statusJson(401, msg);
-}
-
