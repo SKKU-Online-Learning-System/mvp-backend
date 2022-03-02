@@ -335,6 +335,18 @@ router.get('/course', async (req, res) => {
 		}
 	];
 	try {
+		await db.query(`CREATE TABLE course
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			title VARCHAR(100) NOT NULL,
+			description TEXT NOT NULL,
+			inst_id BIGINT NOT NULL,
+			cat1 INT NOT NULL,
+			cat2 INT NOT NULL,
+			thumbnail VARCHAR(200) NULL,
+			difficulty INT NOT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);`);
 		data.forEach(async (e) => {
 			await db.query(`insert into course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) values("${e.name}", "${e.desc}", ${e.inst}, ${e.cat1}, ${e.cat2}, 'no thumbnail', ${e.diff});`);
 		});
@@ -426,8 +438,13 @@ router.get('/course_hashtag', async (req, res) => {
 	[57, 39],
 	[58, 40]];
 	try {
+		await db.query(`CREATE TABLE course_hashtag
+		(
+			course_id BIGINT NOT NULL,
+			hashtag_id BIGINT NOT NULL
+		);`);
 		data.forEach(async (e) => {
-			await db.query(`insert into course_hashtag(course_id, hashtag_id) values(${e[0]}, ${e[1]});`)
+			await db.query(`insert into cosurse_hashtag(course_id, hashtag_id) values(${e[0]}, ${e[1]});`)
 		})
 		res.send('success');
 	} catch (err) {
@@ -671,6 +688,11 @@ router.get('/hashtag', async (req, res) => {
 		}
 	];
 	try {
+		await db.query(`CREATE TABLE hashtag
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			tag VARCHAR(20) NOT NULL
+		);`);
 		data.forEach(async (e) => {
 			await db.query(`INSERT INTO hashtag(id, tag) VALUES(${e.id}, ${e.tag})`);
 		})
@@ -716,10 +738,15 @@ router.get('/cat1', async (req, res) => {
 		}
 	];
 	try {
+		await db.query(`CREATE TABLE cat1
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			name VARCHAR(30) NOT NULL
+		);`);
 		data.forEach(async (e) => {
 			await db.query(`INSERT INTO cat1(id, name) VALUES(${e.id}, ${e.name})`);
 		})
-		return res.json(data[0]);
+		return res.send('success');
 	} catch (err) {
 		return res.json(Err(err.message));
 	}
@@ -949,10 +976,16 @@ router.get('/cat2', async (req, res) => {
 		}
 	];
 	try {
+		await db.query(`CREATE TABLE cat2
+		(
+			id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			name VARCHAR(30) NOT NULL,
+			cat1_id BIGINT NOT NULL
+		);`);
 		data.forEach(async (e) => {
 			await db.query(`INSERT INTO cat2(id, name, cat1_id) VALUES(${e.id}, ${e.name}, ${e.cat1_id})`);
 		})
-		return res.json(data[0]);
+		return res.send('success');
 	} catch (err) {
 		return res.json(Err(err.message));
 	}
