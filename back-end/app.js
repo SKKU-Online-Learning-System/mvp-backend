@@ -7,12 +7,15 @@ import helmet from 'helmet';
 import session from 'express-session';
 import mysqlSession from 'express-mysql-session';
 import cors from 'cors';
+import passport from 'passport';
 import 'dotenv/config';
 
 import indexRouter from './routes/index';
 import apiRouter from './router/apiRouter';
 
-import { DB_options as options } from './configs';
+import { DB_options as options } from './configs'
+import passportConfig from './passport/passportConfig';
+
 
 const app = express();
 
@@ -41,6 +44,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passportConfig(passport);
 
 // router
 app.use('/', indexRouter);

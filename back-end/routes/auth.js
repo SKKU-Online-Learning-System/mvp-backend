@@ -1,13 +1,13 @@
 import express from 'express';
 import crypto from 'crypto';
+import passport from 'passport';
 
-import { DB_promisePool as db, hashSettings, stat } from './../configs';
+import { DB_promisePool as db, hashSettings, Err, statusJson } from './../configs';
+import { isLoggedIn, isNotLoggedIn } from '../passport/middleware';
 
 
 // express
 const router = express.Router();
-
-
 
 // 회원가입
 router.post('/join', async (req, res) => {
@@ -44,6 +44,30 @@ router.get('/emailCheck/:email', async (req, res) => {
 	}
 });
 
+/*
+* Local login API using passport
+* Using Query string 
+*/ 
+router.post('/login', isNotLoggedIn, (req, res, next) => {
+	passport.authenticate('local', (err, user, info) => {
+		if(err) return next(err);
+		if(!user) return res.json(statusJson(400, 'login failed'));
+		return res.json(statusJson(200, req.body.email + ' login success'));
+	}) (req, res, next);
+});
 
+// router.post('/login', isNotLoggedIn, passport.authenticate('local', {
+// 	successRedirect: '/',
+// 	failureRedirect: '/login',
+// 	failureMessage: true
+// }));
+
+/*
+* logout API
+*/ 
+router.get('/logout', isLoggedIn, (req, res) => {
+	req.logout();
+	res.redirect('/');
+});
 
 export default router;
