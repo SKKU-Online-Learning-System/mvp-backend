@@ -6,6 +6,15 @@ import { DB_promisePool as db, Err, statusJson } from './../configs';
 const router = express.Router();
 
 
+// 모든 강의 조회
+router.get('/', async (req, res) => {
+	try {
+		const [result, f] = await db.query('SELECT * FROM course');
+		return res.json(result);
+	} catch (err) {
+		return res.json(Err(err.message));
+	}
+})
 
 // 강의 생성
 router.post('/', async (req, res) => {
@@ -43,7 +52,7 @@ router.get('/cat2', async (req, res) => {
 	}
 });
 
-// 강의 상세정보
+// 강의 조회
 router.get('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 
@@ -88,6 +97,47 @@ router.get('/:courseId', async (req, res) => {
 	}
 });
 
+// 강의 수정
+router.put('/:courseId', async (req, res) => {
+	const { courseId } = req.params;
+	const { title, description, category1, category2, difficulty } = req.body;
+	const thumbnail = 'no thumbnail'; // TODO 썸네일은 서버에 저장하고 DB에는 url 저장
+
+	if (isNaN(courseId)) {
+		return res.json(statusJson(400, 'Bad Request: Course id must be integer.'));
+	}
+
+	try {
+		await db.query(
+			'UPDATE course SET title=?, description=?, cat1=?, cat2=?, thumbnail=?, difficulty=? WHERE id=?',
+			[title, description, category1, category2, thumbnail, difficulty, courseId]
+		);
+		return res.json(statusJson(200, 'OK: Updated'));
+	} catch (err) {
+		return res.json(Err(err.message));
+	}
+});
+
+// 강의 삭제
+router.delete('/:courseId', async (req, res) => {
+	const { courseId } = req.params;
+
+	if (isNaN(courseId)) {
+		return res.json(statusJson(400, 'Bad Request: Course id must be integer.'));
+	}
+
+	try {
+		const [{ affectedRows }] = await db.query('DELETE FROM course WHERE id=?', [courseId]);
+
+		if (affectedRows === 1) {
+			return res.json(statusJson(200, 'OK: Deleted'));
+		} else {
+			return res.json(Err('The command has not been executed.')); // DB에 쿼리를 성공적으로 보냈는데 지워진 게 없는 경우
+		}
+	} catch (err) {
+		return res.json(Err(err.message));
+	}
+})
 
 
 

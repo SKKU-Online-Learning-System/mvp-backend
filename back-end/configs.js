@@ -24,8 +24,18 @@ export { DB_promisePool };
 
 
 export function statusJson(code, msg) {
+	const table = {
+		'200': 'OK',
+		'201': 'Created',
+		'400': 'Bad Request',
+		'401': 'Unauthorized',
+		'403': 'Forbidden',
+		'404': 'Not Found',
+		'409': 'Conflict',
+		'500': 'Internal Server Error',
+	};
 	return {
-		statusCode: code,
+		status: code,
 		msg: msg
 	}
 }
@@ -33,4 +43,3 @@ export function statusJson(code, msg) {
 export function Err(msg) {
 	return statusJson(401, msg);
 }
-
