@@ -1,7 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 
-import { DB_promisePool as db, hashSettings, Err, statusJson } from './../configs';
+import { DB_promisePool as db, hashSettings, stat } from './../configs';
 
 
 // express
@@ -21,9 +21,9 @@ router.post('/join', async (req, res) => {
 			'INSERT INTO user(email, password, name, sex, phone, birth, joined, description, salt) VALUES(?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
 			[email, key, name, sex, phone, birth, description, salt],
 		);
-		return res.json(statusJson(201, 'Created'));
+		return res.json(stat(201));
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
@@ -35,12 +35,12 @@ router.get('/emailCheck/:email', async (req, res) => {
 		const result = await db.query('SELECT id FROM user WHERE email=?', [email]);
 	
 		if (result.length == 0) {
-			return res.json(statusJson(200, 'OK'));
+			return res.json(stat(200));
 		} else {
-			return res.json(statusJson(409, 'Conflict'));
+			return res.json(stat(409));
 		}
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 

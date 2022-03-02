@@ -23,7 +23,7 @@ const DB_promisePool = DB_pool.promise();
 export { DB_promisePool };
 
 
-export function statusJson(code, msg) {
+export function stat(code, ...args) {
 	const table = {
 		'200': 'OK',
 		'201': 'Created',
@@ -34,12 +34,21 @@ export function statusJson(code, msg) {
 		'409': 'Conflict',
 		'500': 'Internal Server Error',
 	};
-	return {
-		status: code,
-		msg: msg
-	}
-}
 
-export function Err(msg) {
-	return statusJson(401, msg);
+	let msg = '';
+	if (args.length > 0) {
+		msg = ': ' + args.join(' ');
+	}
+
+	if (!Object.keys(table).includes(code.toString())) {
+		return {
+			status: code,
+			msg: 'Unknown status code' + msg
+		}
+	} else {
+		return {
+			status: code,
+			msg: table[code.toString()] + msg
+		}
+	}
 }

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { DB_promisePool as db, Err, statusJson } from './../configs';
+import { DB_promisePool as db, stat } from './../configs';
 
 // express
 const router = express.Router();
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
 		const [result, f] = await db.query('SELECT * FROM course');
 		return res.json(result);
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 })
 
@@ -26,9 +26,9 @@ router.post('/', async (req, res) => {
 			'INSERT INTO course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) VALUES(?, ?, ?, ?, ?, ?, ?)',
 			[title, description, instructorId, category1, category2, thumbnail, difficulty]
 		);
-		return res.json(statusJson(201, 'Created'));
+		return res.json(stat(201));
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
@@ -38,7 +38,7 @@ router.get('/cat1', async (req, res) => {
 		const [cat, f] = await db.query('SELECT * FROM cat1');
 		return res.json(cat);
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
@@ -48,7 +48,7 @@ router.get('/cat2', async (req, res) => {
 		const [cat, f] = await db.query('SELECT * FROM cat2');
 		return res.json(cat);
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
@@ -57,14 +57,14 @@ router.get('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 
 	if (isNaN(courseId)) {
-		return res.json(statusJson(400, 'Bad Request: Course id must be integer.'));
+		return res.json(stat(400, 'Course id must be integer.'));
 	}
 
 	try {
 		const [[course]] = await db.query('SELECT * FROM course WHERE id=?', [courseId]);
 
 		if (course === undefined) {
-			return res.json(statusJson(400, 'Bad Request: Invalid course id.'));
+			return res.json(stat(400, 'Invalid course id.'));
 		}
 
 		const queryInst = db.query('SELECT name FROM user WHERE id=?', [course.inst_id]);
@@ -93,7 +93,7 @@ router.get('/:courseId', async (req, res) => {
 
 		return res.json(course);
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
@@ -104,7 +104,7 @@ router.put('/:courseId', async (req, res) => {
 	const thumbnail = 'no thumbnail'; // TODO 썸네일은 서버에 저장하고 DB에는 url 저장
 
 	if (isNaN(courseId)) {
-		return res.json(statusJson(400, 'Bad Request: Course id must be integer.'));
+		return res.json(stat(400, 'Course id must be integer.'));
 	}
 
 	try {
@@ -112,9 +112,9 @@ router.put('/:courseId', async (req, res) => {
 			'UPDATE course SET title=?, description=?, cat1=?, cat2=?, thumbnail=?, difficulty=? WHERE id=?',
 			[title, description, category1, category2, thumbnail, difficulty, courseId]
 		);
-		return res.json(statusJson(200, 'OK: Updated'));
+		return res.json(stat(200, 'Updated'));
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 });
 
@@ -123,19 +123,19 @@ router.delete('/:courseId', async (req, res) => {
 	const { courseId } = req.params;
 
 	if (isNaN(courseId)) {
-		return res.json(statusJson(400, 'Bad Request: Course id must be integer.'));
+		return res.json(stat(400, 'Course id must be integer.'));
 	}
 
 	try {
 		const [{ affectedRows }] = await db.query('DELETE FROM course WHERE id=?', [courseId]);
 
 		if (affectedRows === 1) {
-			return res.json(statusJson(200, 'OK: Deleted'));
+			return res.json(stat(200, 'Deleted'));
 		} else {
-			return res.json(Err('The command has not been executed.')); // DB에 쿼리를 성공적으로 보냈는데 지워진 게 없는 경우
+			return res.json(stat(500, 'The command has not been executed.')); // DB에 쿼리를 성공적으로 보냈는데 지워진 게 없는 경우
 		}
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 })
 

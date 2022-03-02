@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { DB_promisePool as db, Err, statusJson } from './../configs'
+import { DB_promisePool as db, stat } from './../configs'
 
 
 // express
@@ -957,39 +957,41 @@ router.get('/db', async (req, res) => {
 			hashtag_id BIGINT NOT NULL
 		);`);
 	} catch (err) {
-		return res.json(Err(err.message));
+		return res.json(stat(500, err.message));
 	}
 	
 	// course
 	course.forEach(async (e) => {
 		await db.query(`INSERT INTO course(title, description, inst_id, cat1, cat2, thumbnail, difficulty) VALUES(?, ?, ?, ?, ?, ?, ?)`,
 		[e.name, e.desc, e.inst, e.cat1, e.cat2, 'no thumbnail', e.diff])
-			.catch(err => res.json(Err(err.message)));
+			.catch(err => res.json(stat(500, err.message)));
 	});
 	// course_hashtag
 	course_hashtag.forEach(async (e) => {
 		await db.query(`INSERT INTO course_hashtag(course_id, hashtag_id) VALUES(?, ?)`,
 		[e[0], e[1]])
-			.catch(err => res.json(Err(err.message)));
+			.catch(err => res.json(stat(500, err.message)));
 	});
 	// hashtag
 	hashtag.forEach(async (e) => {
 		await db.query(`INSERT INTO hashtag(tag) VALUES(?)`,
 		[e.tag])
-			.catch(err => res.json(Err(err.message)));
+			.catch(err => res.json(stat(500, err.message)));
 	});
 	// cat1
 	cat1.forEach(async (e) => {
 		await db.query(`INSERT INTO cat1(name) VALUES(?)`,
 		[e.name])
-			.catch(err => res.json(Err(err.message)));
+			.catch(err => res.json(stat(500, err.message)));
 	});
 	// cat2
 	cat2.forEach(async (e) => {
 		await db.query(`INSERT INTO cat2(name, cat1_id) VALUES(?, ?)`,
 		[e.name, e.cat1_id])
-			.catch(err => res.json(Err(err.message)));
+			.catch(err => res.json(stat(500, err.message)));
 	});
+
+	return res.json
 })
 
 
