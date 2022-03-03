@@ -70,15 +70,15 @@ courses.get('/', async (req, res) => {
 });
 
 
-// 모든 강의 조회
-courses.get('/', async (req, res) => {
-	try {
-		const [result, f] = await db.query('SELECT * FROM course');
-		return res.json(result);
-	} catch (err) {
-		return res.json(stat(500, err.message));
-	}
-})
+// // 모든 강의 조회
+// courses.get('/', async (req, res) => {
+// 	try {
+// 		const [result, f] = await db.query('SELECT * FROM course');
+// 		return res.json(result);
+// 	} catch (err) {
+// 		return res.json(stat(500, err.message));
+// 	}
+// })
 
 // 강의 생성
 courses.post('/', async (req, res) => {
