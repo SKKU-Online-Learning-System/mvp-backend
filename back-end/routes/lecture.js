@@ -15,4 +15,4 @@ const lectures = express.Router();
 
 
 
-export default router;
+export default lectures;
