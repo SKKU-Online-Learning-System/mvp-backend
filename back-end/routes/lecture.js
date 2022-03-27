@@ -11,7 +11,7 @@ const lectures = express.Router();
 
 // multer config
 const storage = multer.diskStorage({
-    destination: 'uploads/',
+    destination: '../uploads/',
     filename: (req, file, cb) => {
         cb(null, Date.now() + '_' + file.fieldname + path.extname(file.originalname));
     }
@@ -28,45 +28,72 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({storage: storage, fileFilter: fileFilter});
 
-lectures.get('/upload', (req, res, next) => {
+lectures.get('/upload/:courseId', (req, res, next) => {
     res.render('upload', { title: 'Upload' });
 });
 
 /**
  * lecture upload api (create)
  */
-lectures.post('/upload', upload.single('video'), async (req, res) => {
+lectures.post('/upload/:courseId', upload.single('video'), async (req, res) => {
     try {
         const path = "../uploads/" + req.file.filename;
-        const id = req.params.id;
-        const isDuplicate = await db.query('SELECT id from lectures where filename=?', id);
-        
-        if (isDuplicate) {
-            return res.json(stat(404, {success: false}));
-        }
+        const { courseId } = req.params;
 
-        const dml = 'INSERT INTO lecture(title, filename, attached, course_id, created_at) VALUES(?, ?, ?, ?, ?, NOW())';
-        const params = [];
-        await db.query(sql, params);
+        const dml = 'INSERT INTO lecture(title, filename, course_id, created_at) VALUES(?, ?, ?, ?, NOW())';
+        const params = [req.body.title, req.file.filename, courseId];
+        const [ { affectedRows } ] = await db.query(dml, params);
 
-
-        res.json({success: true});
+        if (affectedRows === 1) {
+			return res.status(200).json({success:true});
+		} else {
+			return res.json(stat(500, 'The command has not been executed.'));
+		}
     } catch(err) {
-        res.json(stat(400, err.message));
+        res.json(stat(500, err.message));
     }
 });
 
-lectures.post('/', isLoggedIn, async (req, res) => {
+lectures.get('/:lectureId', async (req, res) => {
+    const { lectureId } = req.params;
+
+    if (isNaN(lectureId)) {
+        return res.json(stat(400, 'Lecture id must be integer.'));
+    }
+
+    try {
+		const [{ filename }] = await db.query('SELECT filename FROM lecture WHERE id=?', [lectureId]);
+
+		if (filename) {
+			return res.status(200).json({path: 'uploads/' + filename});
+		} else {
+			return res.json(stat(400, 'Lecture id doesn\'t exists.'));
+		}
+	} catch (err) {
+		return res.json(stat(500, err.message));
+	}
 
 })
 
+lectures.delete('/:lectureId', async (req, res) => {
+    const { lectureId } = req.params;
+    
+    if (isNaN(lectureId)) {
+        return res.json(stat(400, 'Lecture id must be integer.'));
+    }
 
+    try {
+		const [{ affectedRows }] = await db.query('DELETE FROM lecture WHERE id=?', [lectureId]);
 
-
-
-
-
-
+		if (affectedRows === 1) {
+			return res.json(stat(200, 'Deleted'));
+		} else {
+			return res.json(stat(500, 'The command has not been executed.')); // DB에 쿼리를 성공적으로 보냈는데 지워진 게 없는 경우
+		}
+	} catch (err) {
+		return res.json(stat(500, err.message));
+	}
+})
 
 
 export default lectures;
