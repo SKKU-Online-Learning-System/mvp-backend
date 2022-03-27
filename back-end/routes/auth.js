@@ -9,6 +9,10 @@ import { isLoggedIn, isNotLoggedIn } from '../passport/middleware';
 // express
 const auth = express.Router();
 
+auth.get('/join', (req, res) => {
+	res.render('../views/join');
+})
+
 // 회원가입
 auth.post('/join', async (req, res) => {
 	const { email, password, name, sex, phone, birth, description } = req.body;
@@ -67,7 +71,7 @@ auth.post('/login', isNotLoggedIn, (req, res, next) => {
 */ 
 auth.get('/logout', isLoggedIn, (req, res) => {
 	req.logout();
-	res.redirect('/');
+	res.json(stat(200, 'logout success'));
 });
 
 export default auth;

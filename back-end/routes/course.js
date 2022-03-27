@@ -8,7 +8,6 @@ const courses = express.Router();
 /*
 * Course Lookup API
 * Using Query string 
-* TODO: apply async await on db query
 */ 
 courses.get('/', async (req, res) => {
 	const pageInfo = req.query;
@@ -17,25 +16,25 @@ courses.get('/', async (req, res) => {
 	const pageSize = parseInt(pageInfo.pageSize) || 24; // # of lectures to show, default pageSize=24
 	const string = pageInfo.s; // search string, "undefined" or string
 	const difficulty = (pageInfo.difficulty||'').split(',').filter(item => !Number.isNaN(parseInt(item))); // e.g.) 1,2,3 => [1,2,3]
-	const cat1 = parseInt(pageInfo.cat1); // main category
-	const cat2 = parseInt(pageInfo.cat2); // sub category
+	const cat1 = pageInfo.cat1; // main category
+	const cat2 = pageInfo.cat2; // sub category
 
 	console.log(string, difficulty, pageInfo.cat1, pageInfo.cat2);
 	
 	const isStrValid = typeof string != 'undefined';
 	const isDiffValid = difficulty.length;
-	const isCat1Valid = !Number.isNaN(cat1);
-	const isCat2Valid = !Number.isNaN(cat2);
+	const isCat1Valid = typeof cat1 != 'undefined';
+	const isCat2Valid = typeof cat2 != 'undefined';
 
 	const sqlCnt = 'SELECT count(*) as cnt FROM course ';
-	const sqlResult = 'SELECT * FROM course ';
+	const sqlResult = 'SELECT course.id, course.title, course.difficulty, course.thumbnail, course.created_at FROM course ';
 	
 	let sql = '';
 	let params = [];
 	if (isStrValid || isDiffValid || isCat1Valid || isCat2Valid) sql += 'WHERE ';
 	if (isStrValid) {
-		sql += 'LOWER(name) like LOWER(?) ';
-		params.push(string);
+		sql += 'LOWER(title) like LOWER(?) ';
+		params.push('%'+string+'%');
 	}
 	if (isDiffValid)  {
 		if (isStrValid) sql += 'AND ';
@@ -52,11 +51,11 @@ courses.get('/', async (req, res) => {
 		sql += 'cat2 in (SELECT id FROM cat2 WHERE name=?) ';
 		params.push(cat2);
 	}
-	const sqlLimit = `LIMIT ${(pageNum-1)*pageSize},${pageSize}`;
-	// console.log(isStrValid, isDiffValid, isCat1Valid, isCat2Valid);
-	// console.log('1st sql: ', sqlCnt + sql);
-	// console.log('2nd sql: ', sqlResult + sql + sqlLimit);
-	// console.log('params', params);
+	const sqlLimit = `LIMIT ${(pageNum-1)*pageSize}, ${pageSize}`;
+	console.log(isStrValid, isDiffValid, isCat1Valid, isCat2Valid);
+	console.log('1st sql: ', sqlCnt + sql);
+	console.log('2nd sql: ', sqlResult + sql + sqlLimit);
+	console.log('params', params);
 
 	try {
 		const [totalCnt] = await db.query(sqlCnt+sql, params);
