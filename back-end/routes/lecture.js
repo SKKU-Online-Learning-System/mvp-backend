@@ -1,4 +1,5 @@
 import express from 'express';
+import { unlink } from 'fs';
 import multer from 'multer';
 import path from 'path'
 import { isLoggedIn } from '../passport/middleware';
@@ -9,42 +10,60 @@ import { DB_promisePool as db, stat } from './../configs'
 // express
 const lectures = express.Router();
 
+
+/* JSON
+*  fieldname: 'video',
+*  originalname: '가나다.ts',
+*  encoding: '7bit',
+*  mimetype: 'video/vnd.dlna.mpeg-tts',
+*  destination: '../uploads/',
+*  filename: '1648953639568_video.ts',
+*  path: '../uploads/1648953639568_video.ts',
+*  size: 98822952
+*/
+
 // multer config
 const storage = multer.diskStorage({
-    destination: '../uploads/',
+    destination: './uploads/',
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '_' + file.fieldname + path.extname(file.originalname));
+        const suffix = Date.now() + '_';
+        cb(null, suffix + file.fieldname + path.extname(file.originalname));
     }
 });
 
 const fileFilter = (req, file, cb) => {
-    console.log(req);
     const ext = path.extname(file.originalname);
+    console.log('File extension name is ', ext);
     if (ext !== '.mp4') {
-        cb(null, false);
+        console.log('Reject file upload');
+        // cb(null, false);
+        // 일단 에러 던지게는 했지만, json 형태로 리턴하게 만들어야 함.
+        return cb(new Error('Please upload .mp4 files'));
     }
+    console.log('File upload complete');
     cb(null, true);
 }
 
 const upload = multer({storage: storage, fileFilter: fileFilter});
 
-lectures.get('/upload/:courseId', (req, res, next) => {
+lectures.get('/upload/:courseId', (req, res) => {
     res.render('upload', { title: 'Upload' });
 });
 
 /**
  * lecture upload api (create)
  */
-lectures.post('/upload/:courseId', upload.single('video'), async (req, res) => {
+// lectures.post('/upload/:courseId', upload.single('video'), async (req, res) => {
+lectures.post('/upload/:courseId', upload.array('video'), async (req, res) => {
     try {
-        const path = "../uploads/" + req.file.filename;
-        const { courseId } = req.params;
+        const params = [];
+        req.files.forEach((json) => {
+            params.push([json.originalname, json.filename, req.params.courseId]);
+        });
 
-        const dml = 'INSERT INTO lecture(title, filename, course_id, created_at) VALUES(?, ?, ?, ?, NOW())';
-        const params = [req.body.title, req.file.filename, courseId];
-        const [ { affectedRows } ] = await db.query(dml, params);
+        const [ { affectedRows } ] = await db.query('INSERT INTO lecture (title, filename, course_id) VALUES ?', [params]);
 
-        if (affectedRows === 1) {
+        if (affectedRows !== 0) {
 			return res.status(200).json({success:true});
 		} else {
 			return res.json(stat(500, 'The command has not been executed.'));
@@ -56,16 +75,16 @@ lectures.post('/upload/:courseId', upload.single('video'), async (req, res) => {
 
 lectures.get('/:lectureId', async (req, res) => {
     const { lectureId } = req.params;
-
     if (isNaN(lectureId)) {
         return res.json(stat(400, 'Lecture id must be integer.'));
     }
 
     try {
-		const [{ filename }] = await db.query('SELECT filename FROM lecture WHERE id=?', [lectureId]);
+		const [[ {filename} ]] = await db.query('SELECT filename FROM lecture WHERE id=?', [lectureId]);
+        const videoDir = path.join(__dirname, '..', 'uploads', filename)
 
 		if (filename) {
-			return res.status(200).json({path: 'uploads/' + filename});
+			return res.status(200).json({path: videoDir});
 		} else {
 			return res.json(stat(400, 'Lecture id doesn\'t exists.'));
 		}
@@ -83,12 +102,16 @@ lectures.delete('/:lectureId', async (req, res) => {
     }
 
     try {
-		const [{ affectedRows }] = await db.query('DELETE FROM lecture WHERE id=?', [lectureId]);
+		const [[ {filename} ]] = await db.query('SELECT filename FROM lecture WHERE id=?', [lectureId]);
+        const videoDir = path.join(__dirname, '..', 'uploads', filename)
 
-		if (affectedRows === 1) {
-			return res.json(stat(200, 'Deleted'));
+		if (filename) {
+            unlink(videoDir, (err) => {
+                if (err) return res.json(stat(500, err));
+                else return res.json(stat(200, 'Succesfully deleted from File system.'));
+            });
 		} else {
-			return res.json(stat(500, 'The command has not been executed.')); // DB에 쿼리를 성공적으로 보냈는데 지워진 게 없는 경우
+			return res.json(stat(400, 'Lecture id doesn\'t exists.'));
 		}
 	} catch (err) {
 		return res.json(stat(500, err.message));
