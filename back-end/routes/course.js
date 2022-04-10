@@ -27,7 +27,7 @@ courses.get('/', async (req, res) => {
 	const isCat2Valid = typeof cat2 != 'undefined';
 
 	const sqlCnt = 'SELECT count(*) as cnt FROM course ';
-	const sqlResult = 'SELECT course.id, course.title, course.difficulty, course.thumbnail, course.created_at FROM course ';
+	const sqlResult = 'SELECT course.id, course.title, course.description, course.difficulty, course.thumbnail, course.created_at FROM course ';
 	
 	let sql = '';
 	let params = [];

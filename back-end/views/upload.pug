@@ -4,5 +4,5 @@ block content
   h1= title
   p Welcome to #{title}
   form(method='post', enctype='multipart/form-data')
-    input(type='file', name='video')
-    input(type='submit', name='video', value='Upload Video')
+    input(type='file', name='video' multiple)
+    input(type='submit', value='Upload Video')
