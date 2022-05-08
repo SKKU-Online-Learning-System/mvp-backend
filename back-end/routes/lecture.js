@@ -1,33 +1,51 @@
 import express from 'express';
 import { unlink } from 'fs';
 import multer from 'multer';
+import multerS3 from 'multer-s3'
+import aws from 'aws-sdk'
 import path from 'path'
-import { isLoggedIn } from '../passport/middleware';
 
 import { DB_promisePool as db, stat } from './../configs'
 
+aws.config.update({
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    region: process.env.REGION
+});
 
 // express
 const lectures = express.Router();
+const s3 = new aws.S3();
 
 
 /* JSON
-*  fieldname: 'video',
-*  originalname: '가나다.ts',
-*  encoding: '7bit',
-*  mimetype: 'video/vnd.dlna.mpeg-tts',
-*  destination: '../uploads/',
-*  filename: '1648953639568_video.ts',
-*  path: '../uploads/1648953639568_video.ts',
-*  size: 98822952
+  fieldname: 'video',
+  originalname: '2022-04 데브 매칭.mp4',
+  encoding: '7bit',
+  mimetype: 'video/mp4',
+  size: 149933838,
+  bucket: 'mrdang.com',
+  key: 'lectures/1650796752974_video.mp4',
+  acl: 'public-read-write',
+  contentType: 'application/octet-stream',
+  contentDisposition: null,
+  contentEncoding: null,
+  storageClass: 'STANDARD',
+  serverSideEncryption: null,
+  metadata: null,
+  location: 'https://s3.ap-northeast-2.amazonaws.com/mrdang.com/lectures/1650796752974_video.mp4',
+  etag: '"189e1052a9349d2c17faef8fda042a4d-29"',
+  versionId: undefined
 */
 
 // multer config
-const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: (req, file, cb) => {
+const storage = multerS3({
+    s3: s3,
+    bucket: process.env.BUCKET,
+    acl: 'public-read-write',
+    key: (req, file, cb) => {
         const suffix = Date.now() + '_';
-        cb(null, suffix + file.fieldname + path.extname(file.originalname));
+        cb(null, 'lectures/'+ suffix + file.fieldname + path.extname(file.originalname));
     }
 });
 
@@ -53,12 +71,11 @@ lectures.get('/upload/:courseId', (req, res) => {
 /**
  * lecture upload api (create)
  */
-// lectures.post('/upload/:courseId', upload.single('video'), async (req, res) => {
 lectures.post('/upload/:courseId', upload.array('video'), async (req, res) => {
     try {
         const params = [];
-        req.files.forEach((json) => {
-            params.push([json.originalname, json.filename, req.params.courseId]);
+        req.files.forEach((video) => {
+            params.push([video.originalname, video.key, req.params.courseId]);
         });
 
         const [ { affectedRows } ] = await db.query('INSERT INTO lecture (title, filename, course_id) VALUES ?', [params]);
@@ -81,10 +98,12 @@ lectures.get('/:lectureId', async (req, res) => {
 
     try {
 		const [[ {filename} ]] = await db.query('SELECT filename FROM lecture WHERE id=?', [lectureId]);
-        const videoDir = path.join(__dirname, '..', 'uploads', filename)
+        const url = process.env.S3_URL+process.env.BUCKET
+        const videoPath = path.join(url, filename)
 
 		if (filename) {
-			return res.status(200).json({path: videoDir});
+            console.log(videoPath)
+			return res.status(200).json({path: videoPath});
 		} else {
 			return res.json(stat(400, 'Lecture id doesn\'t exists.'));
 		}
