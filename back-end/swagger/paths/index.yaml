@@ -1,0 +1,11 @@
+# courses
+/courses:
+  $ref: ./course/courses.yaml
+/courses/{courseId}:
+  $ref: ./course/courses-courseId.yaml
+/courses/cat1:
+  $ref: ./course/courses-cat1.yaml
+/courses/cat2:
+  $ref: ./course/courses-cat2.yaml
+
+# lectures

@@ -14,10 +14,14 @@ import indexRouter from './routes/index';
 import apiRouter from './router/apiRouter';
 
 import { DB_options as options } from './configs'
+import { swaggerUi, specs } from './swagger/swagger';
 import passportConfig from './passport/passportConfig';
 
 
 const app = express();
+
+// swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
 // session connect
 var MySQLStore = mysqlSession(session);

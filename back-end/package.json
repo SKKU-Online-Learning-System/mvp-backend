@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./development.js"
+    "start": "node ./development.js",
+    "api-docs": "swagger-cli bundle ./swagger/openapi.yaml --outfile ./swagger/build/swagger.yaml --type yaml"
   },
   "dependencies": {
     "aws-sdk": "^2.1120.0",
@@ -24,7 +25,10 @@
     "mysql2": "^2.3.3",
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
-    "pug": "2.0.0-beta11"
+    "pug": "2.0.0-beta11",
+    "swagger-cli": "^4.0.4",
+    "swagger-ui-express": "^4.4.0",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.15.7",

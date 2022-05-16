@@ -1,0 +1,4 @@
+get:
+  tags: 
+  - /courses
+  summary: 과정 검색

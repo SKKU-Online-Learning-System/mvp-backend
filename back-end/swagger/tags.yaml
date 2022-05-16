@@ -1,0 +1,8 @@
+- name: /courses
+  description:
+- name: /lectures
+  description:
+- name: /users
+  description:
+- name: /auth
+  description:
