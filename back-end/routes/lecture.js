@@ -73,6 +73,10 @@ lectures.get('/upload/:courseId', (req, res) => {
  */
 lectures.post('/upload/:courseId', upload.array('video'), async (req, res) => {
     try {
+        if (!req.files) {
+            return res.status(400).json({success:false, message: 'You should upload at least one file.'});
+        } 
+
         const params = [];
         req.files.forEach((video) => {
             params.push([video.originalname, video.key, req.params.courseId]);
@@ -90,20 +94,28 @@ lectures.post('/upload/:courseId', upload.array('video'), async (req, res) => {
     }
 });
 
-lectures.get('/:lectureId', async (req, res) => {
-    const { lectureId } = req.params;
+lectures.get('/:lectureId/users/:userId', async (req, res) => {
+    const { lectureId, userId } = req.params;
+    
     if (isNaN(lectureId)) {
         return res.json(stat(400, 'Lecture id must be integer.'));
     }
 
+    if (isNaN(userId)) {
+        return res.json(stat(400, 'User id must be integer.'));
+    }
+
     try {
-		const [[ {filename} ]] = await db.query('SELECT filename FROM lecture WHERE id=?', [lectureId]);
+		const [[ {filename, id, user_id, lecture_id, created_at, last_time } ]] = await db.query('SELECT l.filename, h.id, h.user_id, h.lecture_id, h.created_at, h.last_time  \
+                                                                                                  FROM lecture l, history h \
+                                                                                                  WHERE l.id = h.user_id \
+                                                                                                  AND l.id=?', [lectureId]);
         const url = process.env.S3_URL+process.env.BUCKET
         const videoPath = path.join(url, filename)
 
 		if (filename) {
             console.log(videoPath)
-			return res.status(200).json({path: videoPath});
+			return res.status(200).json({path: videoPath, history_id: id, user_id: user_id, lecture_id: lecture_id, created_at: created_at, last_time: last_time});
 		} else {
 			return res.json(stat(400, 'Lecture id doesn\'t exists.'));
 		}
