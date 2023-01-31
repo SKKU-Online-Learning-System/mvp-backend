@@ -1,3 +1,6 @@
+이 repository는 더이상 사용하지 않습니다.
+
+
 들여쓰기: 탭
 
 npm install은 back-end 폴더에서 해주세요
