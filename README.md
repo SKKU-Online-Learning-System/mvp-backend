@@ -1,5 +1,5 @@
-이 repository는 더이상 사용하지 않습니다.
-
+<h2> 이 repository는 더이상 사용하지 않습니다.<br> mvp-backend-nestjs 사용중</h2>
+<br>
 
 들여쓰기: 탭
 
